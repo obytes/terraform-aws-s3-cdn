@@ -1,0 +1,7 @@
+.terraform
+.idea
+terraform.tfvars
+*.tfstate
+*.backup
+*.zip
+.DS_Store
