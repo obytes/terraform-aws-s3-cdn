@@ -125,11 +125,6 @@ You should also update the application's DOT Env environments variables pulled f
 directly from AWS Console.
 
 ```hcl
-resource "aws_secretsmanager_secret_version" "webapp_preview_env_vars" {
-  secret_id     = module.webapp_preview_ci.envs_sm_id
-  secret_string = jsonencode()
-}
-
 resource "aws_secretsmanager_secret_version" "main_webapp_env_vars" {
   secret_id     = module.demo_webapp.main_webapp_envs_sm_id[0]
   secret_string = jsonencode({
