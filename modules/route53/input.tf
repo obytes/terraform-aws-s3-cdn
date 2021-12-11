@@ -16,13 +16,16 @@ variable "comment" {
 
 variable "enable" {
   type = object({
-    main    = bool
-    preview = bool
-    media   = bool
+    main          = bool
+    preview       = bool
+    public_media  = bool
+    private_media = bool
   })
 }
 
-variable "media_signer_public_key" {}
+variable "media_signer_public_key" {
+  default = [ ]
+}
 
 variable "content_security_policy" {
   default = "default-src * 'unsafe-inline'"
@@ -38,8 +41,14 @@ variable "main_fqdn" {
   description = "Main CDN fqdn"
 }
 
-variable "media_fqdn" {
-  description = "Media CDN fqdn"
+variable "private_media_fqdn" {
+  description = "Private Media CDN fqdn"
+  default     = null
+}
+
+variable "public_media_fqdn" {
+  description = "Public Media CDN fqdn"
+  default     = null
 }
 
 # Github

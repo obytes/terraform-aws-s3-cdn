@@ -22,6 +22,10 @@ output "preview_cdn_dist" {
   value = module.webapp_pr_preview_cdn.*.dist
 }
 
-output "media_cdn_dist" {
+output "private_media_cdn_dist" {
   value = module.webapp_media_cdn.*.dist
+}
+
+output "public_media_cdn_dist" {
+  value = module.webapp_public_media_cdn.*.dist
 }

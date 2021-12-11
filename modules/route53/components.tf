@@ -3,11 +3,11 @@
 ################################
 
 module "certification" {
-  source  = "git::https://github.com/obytes/terraform-aws-certify//modules/route53"
+  source  = "git::https://github.com/obytes/terraform-aws-certify.git//modules/route53"
 
   r53_zone_id              = var.dns_zone_id
   domain_name              = var.main_fqdn
-  alternative_domain_names = [local.preview_fqdn_wildcard, var.media_fqdn]
+  alternative_domain_names = compact([local.preview_fqdn_wildcard, var.private_media_fqdn, var.public_media_fqdn])
 }
 
 ####################
@@ -22,9 +22,10 @@ module "webapp" {
   enable  = var.enable
   comment = var.comment
 
-  acm_cert_arn = module.certification.cert_arn
-  main_fqdn    = var.main_fqdn
-  media_fqdn   = var.media_fqdn
+  acm_cert_arn       = module.certification.cert_arn
+  main_fqdn          = var.main_fqdn
+  private_media_fqdn = var.private_media_fqdn
+  public_media_fqdn  = var.public_media_fqdn
 
   media_signer_public_key = var.media_signer_public_key
   content_security_policy = var.content_security_policy
@@ -53,7 +54,7 @@ module "webapp" {
 # Route53 DNS records
 #####################
 resource "aws_route53_record" "main_dns_record" {
-  count   = length(module.webapp["main_cdn_dist"])
+  count   = length(module.webapp.main_cdn_dist)
   zone_id = var.dns_zone_id
   name    = var.main_fqdn
   type    = "A"
@@ -66,7 +67,7 @@ resource "aws_route53_record" "main_dns_record" {
 }
 
 resource "aws_route53_record" "preview_dns_record" {
-  count   = length(module.webapp["preview_cdn_dist"])
+  count   = length(module.webapp.preview_cdn_dist)
   zone_id = var.dns_zone_id
   name    = local.preview_fqdn_wildcard
   type    = "A"
@@ -78,15 +79,29 @@ resource "aws_route53_record" "preview_dns_record" {
   }
 }
 
-resource "aws_route53_record" "media_dns_record" {
-  count   = length(module.webapp["media_cdn_dist"])
+resource "aws_route53_record" "private_media_dns_record" {
+  count   = length(module.webapp.private_media_cdn_dist)
   zone_id = var.dns_zone_id
-  name    = var.media_fqdn
+  name    = var.private_media_fqdn
   type    = "A"
 
   alias {
-    name                   = module.webapp.media_cdn_dist[count.index]["domain_name"]
-    zone_id                = module.webapp.media_cdn_dist[count.index]["zone_id"]
+    name                   = module.webapp.private_media_cdn_dist[count.index]["domain_name"]
+    zone_id                = module.webapp.private_media_cdn_dist[count.index]["zone_id"]
     evaluate_target_health = true
   }
 }
+
+resource "aws_route53_record" "public_media_dns_record" {
+  count   = length(module.webapp.public_media_cdn_dist)
+  zone_id = var.dns_zone_id
+  name    = var.public_media_fqdn
+  type    = "A"
+
+  alias {
+    name                   = module.webapp.public_media_cdn_dist[count.index]["domain_name"]
+    zone_id                = module.webapp.public_media_cdn_dist[count.index]["zone_id"]
+    evaluate_target_health = true
+  }
+}
+

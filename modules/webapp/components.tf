@@ -45,7 +45,7 @@ module "webapp_main_cdn" {
 
 module "webapp_main_ci" {
   count       = var.enable.main ? 1:0
-  source      = "git::https://github.com/obytes/terraform-aws-s3-ci//modules/webapp-release"
+  source      = "git::https://github.com/obytes/terraform-aws-s3-ci.git//modules/webapp-release"
   prefix      = local.prefix
   common_tags = local.common_tags
 
@@ -98,7 +98,7 @@ module "webapp_pr_preview_cdn" {
 
 module "webapp_pr_preview_ci" {
   count       = var.enable.preview ? 1:0
-  source      = "git::https://github.com/obytes/terraform-aws-s3-ci//modules/webapp-preview"
+  source      = "git::https://github.com/obytes/terraform-aws-s3-ci.git//modules/webapp-preview"
   prefix      = local.prefix
   common_tags = local.common_tags
 
@@ -127,19 +127,40 @@ module "webapp_pr_preview_ci" {
 ###################################
 
 module "webapp_media_cdn" {
-  count       = var.enable.media ? 1:0
+  count       = var.enable.private_media && length(var.media_signer_public_key) > 0 ? 1:0
   source      = "../../components/cdn/private"
-  prefix      = "${local.prefix}-private"
+  prefix      = "${local.prefix}-private-media"
   common_tags = local.common_tags
 
   # DNS
-  fqdn           = var.media_fqdn
-  cert_arn       = var.acm_cert_arn
+  fqdn     = var.private_media_fqdn
+  cert_arn = var.acm_cert_arn
 
   # Cloudfront
-  comment                    = "Media | ${var.comment}"
+  comment                    = "Private Media | ${var.comment}"
   cache_policy_id            = module.webapp_policies.cache_policy_id
   origin_request_policy_id   = module.webapp_policies.origin_request_policy_id
   response_headers_policy_id = module.webapp_policies.response_headers_policy_id
   trusted_key_groups         = [module.webapp_private_media_signer.cloudfront_key_group_id]
+}
+
+###################################
+# Web Application Public Media CDN
+###################################
+
+module "webapp_public_media_cdn" {
+  count       = var.enable.public_media ? 1:0
+  source      = "../../components/cdn/private"
+  prefix      = "${local.prefix}-public-media"
+  common_tags = local.common_tags
+
+  # DNS
+  fqdn     = var.public_media_fqdn
+  cert_arn = var.acm_cert_arn
+
+  # Cloudfront
+  comment                    = "Public Media | ${var.comment}"
+  cache_policy_id            = module.webapp_policies.cache_policy_id
+  origin_request_policy_id   = module.webapp_policies.origin_request_policy_id
+  response_headers_policy_id = module.webapp_policies.response_headers_policy_id
 }

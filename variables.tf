@@ -22,7 +22,9 @@ variable "enable" {
   })
 }
 
-variable "media_signer_public_key" {}
+variable "media_signer_public_key" {
+  default = [ ]
+}
 
 variable "content_security_policy" {
   default = "default-src * 'unsafe-inline'"

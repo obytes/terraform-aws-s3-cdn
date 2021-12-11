@@ -8,7 +8,9 @@ Reusable Terraform module for deploying, previewing and serving public static we
 
 - **Preview CDN**: Like Netlify, provides a cloudfront distribution to preview Github feature branches that has an open PR.
 
-- **Media CDN**: Provides a cloudfront distribution to serve public media, or private media using pre-signed URLs.
+- **Public Media CDN**: Provides a cloudfront distribution to serve public media.
+
+- **Private Media CDN**: Provides a cloudfront distribution to private media using pre-signed URLs.
 
 - **Policies**: Provides a cache optimized policy, an origin request policy and a response headers policy to improve 
   performance and secure content.
@@ -66,21 +68,23 @@ domains certification.
 
 ```hcl
 module "demo_webapp" {
-  source      = "git::https://github.com/obytes/terraform-aws-s3-cdn//modules/route53"
+  source      = "git::https://github.com/obytes/terraform-aws-s3-cdn.git//modules/route53"
   prefix      = "${local.prefix}-demo"
   common_tags = local.common_tags
 
   comment = "Demo wep application"
 
   enable = {
-    main    = true
-    preview = true
-    media   = true
+    main          = true
+    preview       = true
+    public_media  = true
+    private_media = true
   }
 
-  dns_zone_id = aws_route53_zone._.zone_id
-  main_fqdn   = "demo.kodhive.com"
-  media_fqdn  = "demo-private-media.kodhive.com"
+  dns_zone_id        = aws_route53_zone._.zone_id
+  main_fqdn          = "demo.kodhive.com"
+  public_media_fqdn  = "demo-public-media.kodhive.com"
+  private_media_fqdn = "demo-private-media.kodhive.com"
 
   media_signer_public_key = file("${path.module}/public_key.pem")
   content_security_policy = "default-src * 'unsafe-inline'"
@@ -105,11 +109,11 @@ module "demo_webapp" {
   }
 
   # Build
-  app_base_dir          = "."
-  app_build_dir         = "build"
-  app_node_version      = "latest"
-  app_install_cmd       = "yarn install"
-  app_build_cmd         = "yarn build"
+  app_base_dir     = "."
+  app_build_dir    = "build"
+  app_node_version = "latest"
+  app_install_cmd  = "yarn install"
+  app_build_cmd    = "yarn build"
 
   # Notification
   ci_notifications_slack_channels = {
