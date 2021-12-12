@@ -64,7 +64,7 @@ variable "is_preview" {
   default     = false
 }
 
-variable "preview_function_arn" {
+variable "url_rewrite_function_arn" {
   description = "The ARN of the cloudfront function responsible for url-rewrite and routing to previews s3 key"
   default     = null
 }

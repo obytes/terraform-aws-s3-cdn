@@ -73,10 +73,10 @@ resource "aws_cloudfront_distribution" "_" {
     viewer_protocol_policy     = "redirect-to-https"
 
     dynamic "function_association" {
-      for_each = var.is_preview ? [1] : []
+      for_each = var.url_rewrite_function_arn != null ? [1] : []
       content {
         event_type   = "viewer-request"
-        function_arn = var.preview_function_arn
+        function_arn = var.url_rewrite_function_arn
       }
     }
   }

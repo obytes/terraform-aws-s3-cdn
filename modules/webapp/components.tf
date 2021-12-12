@@ -10,8 +10,8 @@ module "webapp_policies" {
   content_security_policy = var.content_security_policy
 }
 
-module "webapp_preview_function" {
-  source      = "../../components/shared/preview-function"
+module "url_rewrite_function" {
+  source      = "../../components/shared/url-rewrite-function"
   prefix      = local.prefix
   common_tags = local.common_tags
 }
@@ -41,6 +41,8 @@ module "webapp_main_cdn" {
   cache_policy_id            = module.webapp_policies.cache_policy_id
   origin_request_policy_id   = module.webapp_policies.origin_request_policy_id
   response_headers_policy_id = module.webapp_policies.response_headers_policy_id
+
+  url_rewrite_function_arn = module.url_rewrite_function.arn
 }
 
 module "webapp_main_ci" {
@@ -92,8 +94,8 @@ module "webapp_pr_preview_cdn" {
   origin_request_policy_id   = module.webapp_policies.origin_request_policy_id
   response_headers_policy_id = module.webapp_policies.response_headers_policy_id
 
-  is_preview           = true
-  preview_function_arn = module.webapp_preview_function.viewer_request_function_arn
+  is_preview               = true
+  url_rewrite_function_arn = module.url_rewrite_function.arn
 }
 
 module "webapp_pr_preview_ci" {
